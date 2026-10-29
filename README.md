@@ -18,12 +18,13 @@ cp .env.example .env        # isi DATABASE_URL dan AUTH_SECRET
 npx prisma migrate dev      # buat tabel
 npx prisma db seed          # 15 soal CONTOH (ganti lewat Admin > Soal)
 ADMIN_NAME="Nama" ADMIN_EMAIL="email@x.com" ADMIN_PASSWORD="min-8-karakter" npm run db:bootstrap
-# taruh public/videos/induksi.mp4 (caption sudah ada di dalam video)
+# isi VIDEO_YOUTUBE di .env (tautan YouTube unlisted) atau taruh public/videos/induksi.mp4
 npm run dev
 ```
 Panel security: `/admin` · Tes: `npm test`
 
 ## Yang perlu diketahui
+- Video YouTube: kontrol disembunyikan, lompatan maju dikembalikan, kecepatan dikunci. Pemutar belum diuji dengan YouTube asli (hanya tiruan API), jadi uji di HP Android dan iPhone sebelum dipakai. Jaringan pabrik harus bisa membuka youtube.com.
 - Anti-skip video di browser bukan jaminan mutlak (HP bisa dibiarkan memutar). Lapis lainnya: kuis, isian komitmen, dan konfirmasi tatap muka security.
 - Pengunjung berulang dikenali dari nomor HP; security tetap memeriksa identitas langsung.
 - Belum ada pembatasan laju (rate limit) pada pembuatan kunjungan.

@@ -12,7 +12,8 @@
 }
 
 :root {
-  --surface: #f6f7f9;
+  color-scheme: light;
+  --surface: #ffffff;
   --card: #ffffff;
   --border: #e3e6ea;
   --muted: #5d6471;

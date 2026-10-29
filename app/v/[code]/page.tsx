@@ -30,7 +30,7 @@ export default async function VisitPage({
     return (
       <VisitorShell title="Video Induksi" step={{ current: 2, total: 4, label: "Video" }}>
         <Intro>Putar video sampai selesai. Video tidak bisa dipercepat atau dilompati. Nyalakan suara.</Intro>
-        <VideoPlayer code={code} src={induction.videoSrc} />
+        <VideoPlayer code={code} src={induction.videoSrc} youtubeId={induction.youtube} />
       </VisitorShell>
     );
   }

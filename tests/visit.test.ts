@@ -93,3 +93,22 @@ describe("shuffle", () => {
     expect(src).toEqual([1, 2, 3, 4, 5]);
   });
 });
+
+import { parseYouTubeId } from "@/lib/video";
+
+describe("parseYouTubeId", () => {
+  it("mengenali tautan pendek beserta parameter si", () => {
+    expect(parseYouTubeId("https://youtu.be/4sUxKaVpqVc?si=Jz3dqGAZCyTEGo27")).toBe("4sUxKaVpqVc");
+  });
+  it("mengenali watch, embed, shorts, dan ID polos", () => {
+    expect(parseYouTubeId("https://www.youtube.com/watch?v=4sUxKaVpqVc&t=3")).toBe("4sUxKaVpqVc");
+    expect(parseYouTubeId("https://www.youtube.com/embed/4sUxKaVpqVc")).toBe("4sUxKaVpqVc");
+    expect(parseYouTubeId("https://youtube.com/shorts/4sUxKaVpqVc")).toBe("4sUxKaVpqVc");
+    expect(parseYouTubeId("4sUxKaVpqVc")).toBe("4sUxKaVpqVc");
+  });
+  it("menolak masukan lain", () => {
+    expect(parseYouTubeId("")).toBeNull();
+    expect(parseYouTubeId(undefined)).toBeNull();
+    expect(parseYouTubeId("https://example.com/video.mp4")).toBeNull();
+  });
+});

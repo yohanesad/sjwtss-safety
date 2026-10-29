@@ -1,3 +1,5 @@
+import { parseYouTubeId } from "./video";
+
 /**
  * Pemeriksaan variabel lingkungan dengan pesan yang bisa ditindaklanjuti.
  *
@@ -74,7 +76,10 @@ function intFromEnv(name: string, fallback: number, min: number, max: number): n
   const raw = process.env[name]?.trim();
   if (!raw) return fallback;
   const value = Number(raw);
-  if (!Number.isFinite(value) || value < min || value > max) return fallback;
+  if (!Number.isFinite(value) || value < min || value > max) {
+    console.warn(`${name}="${raw}" tidak valid (harus ${min}–${max}); memakai nilai bawaan ${fallback}.`);
+    return fallback;
+  }
   return value;
 }
 
@@ -82,13 +87,17 @@ function intFromEnv(name: string, fallback: number, min: number, max: number): n
 export const induction = {
   /** Lama video induksi dalam detik. Dipakai server untuk menolak "selesai" yang terlalu cepat. */
   get videoSeconds() {
-    return intFromEnv("VIDEO_DURATION_SECONDS", 240, 10, 3600);
+    return intFromEnv("VIDEO_DURATION_SECONDS", 240, 1, 7200);
   },
   /** Berapa bagian video yang minimal harus sudah berjalan menurut jam server (0.5–1). */
   get minWatchRatio() {
     return intFromEnv("VIDEO_MIN_WATCH_PERCENT", 90, 50, 100) / 100;
   },
-  /** Berkas video relatif terhadap folder public/. */
+  /** Tautan/ID YouTube. Bila diisi, dipakai menggantikan berkas video sendiri. */
+  get youtube() {
+    return parseYouTubeId(process.env.VIDEO_YOUTUBE);
+  },
+  /** Berkas video relatif terhadap folder public/ (dipakai bila VIDEO_YOUTUBE kosong). */
   get videoSrc() {
     return process.env.VIDEO_SRC?.trim() || "/videos/induksi.mp4";
   },
