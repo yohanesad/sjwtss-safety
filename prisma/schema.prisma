@@ -66,10 +66,9 @@ model Visit {
   hostName       String
   department     String?
   visitDate      DateTime @db.Date
-  durationDays   Int      @default(1)
+  /// Perkiraan lama kunjungan dalam jam (opsional, hanya estimasi).
+  estimatedHours Int?
   vehiclePlate   String?
-  emergencyName  String
-  emergencyPhone String
   consentAt      DateTime
 
   status VisitStatus @default(VIDEO)

@@ -35,10 +35,12 @@ const biodataSchema = z.object({
   hostName: text("Orang yang dituju"),
   department: z.string().trim().max(120).optional(),
   visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Tanggal kunjungan tidak valid."),
-  durationDays: z.coerce.number().int().min(1, "Lama kunjungan minimal 1 hari.").max(30),
+  estimatedHours: z
+    .string()
+    .trim()
+    .optional()
+    .refine((v) => !v || (/^\d{1,2}$/.test(v) && Number(v) >= 1 && Number(v) <= 72), "Perkiraan lama kunjungan harus 1–72 jam."),
   vehiclePlate: z.string().trim().max(20).optional(),
-  emergencyName: text("Nama kontak darurat"),
-  emergencyPhone: z.string().trim().refine(isPlausiblePhone, "Nomor kontak darurat tidak valid."),
   consent: z.literal("on", "Anda harus menyetujui penggunaan data pribadi."),
 });
 
@@ -79,10 +81,8 @@ export async function createVisitAction(_prev: FormState, formData: FormData): P
           hostName: d.hostName,
           department: d.department || null,
           visitDate: dateOnly(d.visitDate),
-          durationDays: d.durationDays,
+          estimatedHours: d.estimatedHours ? Number(d.estimatedHours) : null,
           vehiclePlate: d.vehiclePlate ? d.vehiclePlate.toUpperCase() : null,
-          emergencyName: d.emergencyName,
-          emergencyPhone: normalizePhone(d.emergencyPhone),
           consentAt: now,
           inductionSkipped: skip,
           status: skip ? "WAITING_SECURITY" : "VIDEO",

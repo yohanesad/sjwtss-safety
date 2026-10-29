@@ -11,7 +11,7 @@ export default function BiodataForm({ today, purposes }: { today: string; purpos
   return (
     <form action={action} className="space-y-4">
       <Card className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">Data diri</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-brand-600">Data diri</h2>
         <Field label="Nama lengkap">
           <input name="fullName" required autoComplete="name" className={inputClass} />
         </Field>
@@ -27,7 +27,7 @@ export default function BiodataForm({ today, purposes }: { today: string; purpos
       </Card>
 
       <Card className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">Kunjungan</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-brand-600">Kunjungan</h2>
         <Field label="Tujuan kunjungan">
           <select name="purpose" required defaultValue="" className={inputClass}>
             <option value="" disabled>
@@ -50,24 +50,15 @@ export default function BiodataForm({ today, purposes }: { today: string; purpos
           <Field label="Tanggal">
             <input name="visitDate" type="date" required min={today} defaultValue={today} className={inputClass} />
           </Field>
-          <Field label="Lama (hari)">
-            <input name="durationDays" type="number" inputMode="numeric" min={1} max={30} defaultValue={1} required className={inputClass} />
+          <Field label="Perkiraan lama (jam)" hint="Opsional, hanya perkiraan.">
+            <input name="estimatedHours" type="number" inputMode="numeric" min={1} max={72} className={inputClass} placeholder="mis. 3" />
           </Field>
         </div>
       </Card>
 
-      <Card className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">Kontak darurat</h2>
-        <Field label="Nama">
-          <input name="emergencyName" required className={inputClass} />
-        </Field>
-        <Field label="Nomor HP">
-          <input name="emergencyPhone" type="tel" inputMode="tel" required className={inputClass} />
-        </Field>
-      </Card>
 
       <label className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 text-sm">
-        <input name="consent" type="checkbox" required className="mt-0.5 h-5 w-5 shrink-0 accent-amber-500" />
+        <input name="consent" type="checkbox" required className="mt-0.5 h-5 w-5 shrink-0 accent-red-600" />
         <span>
           Saya menyatakan data di atas benar dan menyetujui data pribadi saya dipakai untuk keperluan
           keselamatan dan pencatatan kunjungan pabrik.

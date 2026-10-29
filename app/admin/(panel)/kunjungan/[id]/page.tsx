@@ -83,7 +83,7 @@ export default async function VisitDetailPage({ params }: { params: Promise<{ id
             <Row label="Bertemu">{v.hostName}</Row>
             <Row label="Departemen">{v.department}</Row>
             <Row label="Tanggal">{formatDate(v.visitDate)}</Row>
-            <Row label="Lama">{v.durationDays} hari</Row>
+            <Row label="Perkiraan lama">{v.estimatedHours ? `${v.estimatedHours} jam` : null}</Row>
             <Row label="Kendaraan">{v.vehiclePlate}</Row>
           </dl>
         </Card>
@@ -91,8 +91,6 @@ export default async function VisitDetailPage({ params }: { params: Promise<{ id
           <h2 className="mb-1 font-bold">Kontak</h2>
           <dl>
             <Row label="HP">{v.phone}</Row>
-            <Row label="Kontak darurat">{v.emergencyName}</Row>
-            <Row label="HP darurat">{v.emergencyPhone}</Row>
           </dl>
         </Card>
       </div>

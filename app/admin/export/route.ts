@@ -26,14 +26,14 @@ export async function GET(request: Request) {
   });
 
   const header = [
-    "Kode", "Tanggal", "Nama", "Perusahaan", "HP", "Tujuan", "Bertemu", "Departemen", "Lama (hari)",
-    "Kendaraan", "Kontak darurat", "HP darurat", "Status", "Induksi dilewati", "Video selesai",
+    "Kode", "Tanggal", "Nama", "Perusahaan", "HP", "Tujuan", "Bertemu", "Departemen", "Perkiraan lama (jam)",
+    "Kendaraan", "Status", "Induksi dilewati", "Video selesai",
     "Nilai kuis (%)", "Komitmen", "Stiker", "Diputuskan oleh", "Waktu keputusan", "Keluar",
   ];
   const lines = visits.map((v) =>
     [
       v.code, v.visitDate.toISOString().slice(0, 10), v.fullName, v.company, v.phone, v.purpose,
-      v.hostName, v.department, v.durationDays, v.vehiclePlate, v.emergencyName, v.emergencyPhone,
+      v.hostName, v.department, v.estimatedHours, v.vehiclePlate,
       v.status, v.inductionSkipped ? "Ya" : "Tidak",
       v.videoCompletedAt ? formatDateTime(v.videoCompletedAt) : "",
       v.quizBestPercent, v.commitmentText, v.stickerNumber, v.decidedBy?.name,

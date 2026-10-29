@@ -5,11 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { completeVideoAction, startVideoAction } from "@/app/actions";
 import { primaryButton, secondaryButton } from "@/components/ui";
 
-function setTrackVisible(video: HTMLVideoElement | null, visible: boolean) {
-  const track = video?.textTracks[0];
-  if (track) track.mode = visible ? "showing" : "hidden";
-}
-
 /**
  * Pemutar tanpa kontrol bawaan: tidak ada seek, tidak ada percepatan, dan
  * video berhenti bila tab ditinggalkan. Pencegahan di browser ini hanya
@@ -18,11 +13,9 @@ function setTrackVisible(video: HTMLVideoElement | null, visible: boolean) {
 export default function VideoPlayer({
   code,
   src,
-  subtitleSrc,
 }: {
   code: string;
   src: string;
-  subtitleSrc: string;
 }) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -31,7 +24,6 @@ export default function VideoPlayer({
 
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [captions, setCaptions] = useState(true);
   const [phase, setPhase] = useState<"watching" | "finishing" | "done">("watching");
   const [error, setError] = useState<string | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -44,12 +36,6 @@ export default function VideoPlayer({
     document.addEventListener("visibilitychange", onHidden);
     return () => document.removeEventListener("visibilitychange", onHidden);
   }, []);
-
-  function toggleCaptions() {
-    const next = !captions;
-    setTrackVisible(videoRef.current, next);
-    setCaptions(next);
-  }
 
   async function togglePlay() {
     const v = videoRef.current;
@@ -113,7 +99,6 @@ export default function VideoPlayer({
           onError={() => setLoadFailed(true)}
         >
           <source src={src} type="video/mp4" />
-          <track kind="subtitles" srcLang="en" label="English" src={subtitleSrc} default />
         </video>
         {!playing && phase === "watching" && !loadFailed ? (
           <button
@@ -122,7 +107,7 @@ export default function VideoPlayer({
             aria-label="Putar video"
             className="absolute inset-0 flex items-center justify-center bg-black/40"
           >
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-500 text-3xl text-ink">
+            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-3xl text-white">
               ▶
             </span>
           </button>
@@ -136,15 +121,12 @@ export default function VideoPlayer({
       ) : null}
 
       <div className="h-2 overflow-hidden rounded-full bg-neutral-200" aria-hidden>
-        <div className="h-full rounded-full bg-brand-500 transition-[width]" style={{ width: `${progress}%` }} />
+        <div className="h-full rounded-full bg-brand-600 transition-[width]" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="flex gap-2">
         <button type="button" onClick={togglePlay} disabled={phase !== "watching"} className={`${secondaryButton} flex-1`}>
           {playing ? "⏸ Jeda" : "▶ Putar"}
-        </button>
-        <button type="button" onClick={toggleCaptions} aria-pressed={captions} className={secondaryButton}>
-          CC {captions ? "aktif" : "mati"}
         </button>
       </div>
 

@@ -35,14 +35,14 @@ export default function QuizForm({
               {q.options.map((o) => (
                 <label
                   key={o.index}
-                  className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--border)] p-3 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
+                  className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--border)] p-3 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
                 >
                   <input
                     type="radio"
                     name={`q_${q.id}`}
                     value={o.index}
                     required
-                    className="mt-1 h-5 w-5 shrink-0 accent-amber-500"
+                    className="mt-1 h-5 w-5 shrink-0 accent-red-600"
                   />
                   <span className="text-base">{o.label}</span>
                 </label>

@@ -74,6 +74,11 @@ describe("penilaian kuis", () => {
     const answers = Object.fromEntries(qs.map((q, i) => [q.id, i < 11 ? 1 : 0]));
     expect(gradeQuiz(qs, answers, 80).passed).toBe(false);
   });
+  it("ambang 100%: satu salah saja tidak lulus", () => {
+    const answers = Object.fromEntries(qs.map((q, i) => [q.id, i < 14 ? 1 : 0]));
+    expect(gradeQuiz(qs, answers, 100).passed).toBe(false);
+    expect(gradeQuiz(qs, Object.fromEntries(qs.map((q) => [q.id, 1])), 100).passed).toBe(true);
+  });
   it("jawaban kosong dihitung salah; tanpa soal tidak pernah lulus", () => {
     expect(gradeQuiz(qs, {}, 80).correct).toBe(0);
     expect(gradeQuiz([], {}, 80).passed).toBe(false);

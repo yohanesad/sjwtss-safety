@@ -92,14 +92,11 @@ export const induction = {
   get videoSrc() {
     return process.env.VIDEO_SRC?.trim() || "/videos/induksi.mp4";
   },
-  get subtitleSrc() {
-    return process.env.VIDEO_SUBTITLE_SRC?.trim() || "/videos/induksi.en.vtt";
-  },
   /** Masa berlaku induksi untuk kunjungan berikutnya. */
   get validDays() {
     return intFromEnv("INDUCTION_VALID_DAYS", 90, 1, 3650);
   },
   get passPercent() {
-    return intFromEnv("QUIZ_PASS_PERCENT", 80, 1, 100);
+    return intFromEnv("QUIZ_PASS_PERCENT", 100, 1, 100);
   },
 };
