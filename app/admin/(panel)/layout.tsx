@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/guard";
 import { logoutAction } from "../actions";
@@ -8,7 +9,8 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     <div className="min-h-screen">
       <header className="no-print bg-brand-600 text-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
-          <Link href="/admin" className="font-bold">
+          <Link href="/admin" className="flex items-center gap-3 font-bold">
+            <Image src="/logo-putih.png" alt="SCG" width={520} height={171} className="h-8 w-auto" />
             Panel Security
           </Link>
           <nav className="flex flex-wrap gap-4 text-sm">

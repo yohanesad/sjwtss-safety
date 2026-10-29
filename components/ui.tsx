@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 export const inputClass =
@@ -66,12 +67,7 @@ export function VisitorShell({
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-white shadow-sm">
       <header className="bg-brand-600 px-4 pb-10 pt-4 text-white">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-white text-2xl font-extrabold leading-none">
-              !
-            </span>
-            <span className="text-2xl font-extrabold leading-none tracking-tight">Safety</span>
-          </div>
+          <Image src="/logo-putih.png" alt="SCG" width={520} height={171} priority className="h-11 w-auto" />
           <span className="text-lg font-bold italic">Keselamatan Utama</span>
         </div>
       </header>
