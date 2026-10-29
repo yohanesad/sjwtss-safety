@@ -1,0 +1,17 @@
+[
+  { "text": "[CONTOH] Apa yang wajib dikenakan saat berada di area produksi?", "options": ["Alat Pelindung Diri (APD) sesuai ketentuan", "Pakaian bebas", "Sandal", "Tidak ada ketentuan"], "correct": 1 },
+  { "text": "[CONTOH] Apa yang harus dilakukan saat alarm darurat berbunyi?", "options": ["Tetap bekerja", "Menuju titik kumpul terdekat melalui jalur evakuasi", "Mengambil barang pribadi dulu", "Menunggu di dalam gedung"], "correct": 2 },
+  { "text": "[CONTOH] Merokok diperbolehkan di…", "options": ["Area produksi", "Gudang bahan kimia", "Area merokok yang ditentukan saja", "Di mana saja"], "correct": 3 },
+  { "text": "[CONTOH] Bagaimana pengunjung boleh bergerak di area pabrik?", "options": ["Sendirian ke mana saja", "Didampingi petugas/tuan rumah dan hanya di jalur yang ditentukan", "Mengikuti siapa saja", "Berlari agar cepat"], "correct": 2 },
+  { "text": "[CONTOH] Saat melihat kondisi tidak aman (tumpahan, kabel terkelupas), apa yang dilakukan?", "options": ["Diabaikan", "Memotret untuk media sosial", "Segera melapor ke petugas terdekat", "Memperbaiki sendiri"], "correct": 3 },
+  { "text": "[CONTOH] Kendaraan forklift sedang bergerak. Anda sebaiknya…", "options": ["Menyeberang di depannya", "Memberi jarak dan menunggu hingga aman", "Berdiri di jalurnya", "Menaiki forklift"], "correct": 2 },
+  { "text": "[CONTOH] Apakah pengunjung boleh menyentuh atau mengoperasikan mesin?", "options": ["Boleh bila penasaran", "Boleh bila mesin mati", "Tidak boleh, kecuali diizinkan dan didampingi petugas berwenang", "Boleh bila tidak ada yang melihat"], "correct": 3 },
+  { "text": "[CONTOH] Apa fungsi stiker pass pengunjung?", "options": ["Hiasan", "Tanda pengenal resmi yang harus terlihat selama di lokasi", "Boleh dipinjamkan", "Dibuang setelah masuk"], "correct": 2 },
+  { "text": "[CONTOH] Kecelakaan kecil terjadi pada Anda. Apa yang dilakukan?", "options": ["Menyembunyikannya", "Segera lapor ke petugas/tuan rumah", "Pulang tanpa memberi tahu", "Menunggu besok"], "correct": 2 },
+  { "text": "[CONTOH] Memotret di area pabrik…", "options": ["Bebas", "Hanya dengan izin dari pihak pabrik", "Boleh bila untuk pribadi", "Boleh di semua area"], "correct": 2 },
+  { "text": "[CONTOH] Di mana lokasi alat pemadam api ringan (APAR) harus diketahui?", "options": ["Tidak perlu diketahui", "Perlu diketahui sejak awal kunjungan", "Hanya oleh petugas", "Hanya oleh manajer"], "correct": 2 },
+  { "text": "[CONTOH] Lantai licin atau basah. Tindakan yang tepat…", "options": ["Berlari melewatinya", "Berhati-hati, hindari, dan laporkan", "Mengabaikan", "Melompat"], "correct": 2 },
+  { "text": "[CONTOH] Penggunaan ponsel saat berjalan di area operasional…", "options": ["Aman dilakukan", "Berbahaya; hindari saat berjalan di area operasional", "Wajib", "Tidak masalah"], "correct": 2 },
+  { "text": "[CONTOH] Saat selesai berkunjung, apa yang harus dilakukan?", "options": ["Pulang diam-diam", "Melapor ke security dan mengembalikan/melepas pass sesuai aturan", "Menyimpan pass", "Memberikan pass ke orang lain"], "correct": 2 },
+  { "text": "[CONTOH] Jika tidak yakin apakah suatu area aman dimasuki, Anda sebaiknya…", "options": ["Masuk saja", "Bertanya kepada pendamping/petugas terlebih dahulu", "Menebak", "Meminta orang lain masuk dulu"], "correct": 2 }
+]

@@ -1,0 +1,129 @@
+// Skema database Safety Induction System (induksi keselamatan pengunjung pabrik).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  SECURITY
+}
+
+/// Urutan langkah pengunjung. Status hanya boleh maju lewat server action.
+enum VisitStatus {
+  VIDEO             // biodata sudah diisi, menunggu video selesai
+  QUIZ              // video selesai, mengerjakan kuis
+  WAITING_SECURITY  // kuis lulus (atau induksi lama masih berlaku), menunggu security
+  APPROVED          // disetujui security, stiker diberikan
+  REJECTED          // ditolak security
+  CHECKED_OUT       // sudah keluar
+}
+
+/// Akun admin dan petugas security.
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(SECURITY)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  approvedVisits Visit[]
+}
+
+/// Orang yang pernah berkunjung. Dikenali dari nomor HP (sudah dinormalkan).
+model Visitor {
+  id                  String    @id @default(cuid())
+  phone               String    @unique
+  fullName            String
+  company             String
+  /// Induksi dianggap berlaku sampai tanggal ini; null = belum pernah lulus.
+  inductionValidUntil DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  visits Visit[]
+}
+
+/// Satu kali kunjungan. `code` adalah kode unik yang tampil pada layar pengunjung.
+model Visit {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  visitorId String
+  visitor   Visitor  @relation(fields: [visitorId], references: [id])
+
+  // Biodata (disalin per kunjungan agar riwayat tidak berubah)
+  fullName       String
+  company        String
+  phone          String
+  purpose        String
+  hostName       String
+  department     String?
+  visitDate      DateTime @db.Date
+  durationDays   Int      @default(1)
+  vehiclePlate   String?
+  emergencyName  String
+  emergencyPhone String
+  consentAt      DateTime
+
+  status VisitStatus @default(VIDEO)
+
+  /// true bila induksi lama masih berlaku sehingga video & kuis dilewati.
+  inductionSkipped Boolean   @default(false)
+  videoStartedAt   DateTime?
+  videoCompletedAt DateTime?
+  quizPassedAt     DateTime?
+  quizBestPercent  Int?
+  commitmentText   String?
+
+  // Keputusan security
+  decidedById    String?
+  decidedBy      User?     @relation(fields: [decidedById], references: [id])
+  decidedAt      DateTime?
+  stickerNumber  String?
+  rejectedReason String?
+  checkedOutAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempts QuizAttempt[]
+
+  @@index([status, createdAt])
+  @@index([visitDate])
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  visitId   String
+  visit     Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  correct   Int
+  total     Int
+  percent   Int
+  passed    Boolean
+  /// { [questionId]: indeksJawaban } untuk jejak audit
+  answers   Json
+  createdAt DateTime @default(now())
+
+  @@index([visitId])
+}
+
+/// Soal pilihan ganda. Jawaban benar TIDAK PERNAH dikirim ke browser pengunjung.
+model Question {
+  id           String   @id @default(cuid())
+  position     Int      @default(0)
+  text         String
+  options      String[]
+  correctIndex Int
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([active, position])
+}

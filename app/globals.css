@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #fff8e6;
+  --color-brand-100: #ffedb8;
+  --color-brand-500: #f5a300;
+  --color-brand-600: #d98c00;
+  --color-brand-700: #a86b00;
+  --color-ink: #16181d;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  --surface: #f6f7f9;
+  --card: #ffffff;
+  --border: #e3e6ea;
+  --muted: #5d6471;
+}
+
+html,
+body {
+  background: var(--surface);
+  color: var(--color-ink);
+}
+
+/* Cegah zoom otomatis iOS saat fokus ke input. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
