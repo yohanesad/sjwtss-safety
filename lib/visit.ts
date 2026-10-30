@@ -95,15 +95,5 @@ export function shuffle<T>(items: readonly T[]): T[] {
   return out;
 }
 
-export const COMMITMENT_PROMPT =
-  "Tuliskan komitmen Anda untuk menjaga keselamatan diri sendiri dan orang lain selama berada di area pabrik.";
 export const COMMITMENT_MIN_LENGTH = 20;
 
-export const PURPOSES = [
-  "Meeting / tamu perusahaan",
-  "Kontraktor / pekerjaan",
-  "Audit / inspeksi",
-  "Pengiriman barang",
-  "Training / magang",
-  "Lainnya",
-] as const;

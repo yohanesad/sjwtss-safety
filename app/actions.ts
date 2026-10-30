@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { induction } from "@/lib/env";
+import { getInduction } from "@/lib/content";
 import { dateOnly, todayJakarta } from "@/lib/format";
 import {
   addDays,
@@ -113,8 +113,9 @@ export async function completeVideoAction(code: string): Promise<{ ok: boolean; 
   if (!visit) return { ok: false, error: "Kunjungan tidak ditemukan." };
   if (visit.status !== "VIDEO") return { ok: true };
 
+  const ind = await getInduction();
   const now = new Date();
-  if (!hasWatchedLongEnough(visit.videoStartedAt, now, induction.videoSeconds, induction.minWatchRatio)) {
+  if (!hasWatchedLongEnough(visit.videoStartedAt, now, ind.videoSeconds, ind.minWatchRatio)) {
     return { ok: false, error: "Video belum selesai ditonton. Silakan tonton sampai akhir." };
   }
   await prisma.visit.update({
@@ -155,7 +156,8 @@ export async function submitQuizAction(
   }
   if (commitment.length > 1000) return { error: "Isian komitmen terlalu panjang." };
 
-  const result = gradeQuiz(questions, answers, induction.passPercent);
+  const ind = await getInduction();
+  const result = gradeQuiz(questions, answers, ind.passPercent);
   const now = new Date();
 
   await prisma.quizAttempt.create({
@@ -185,7 +187,7 @@ export async function submitQuizAction(
     }),
     prisma.visitor.update({
       where: { id: visit.visitorId },
-      data: { inductionValidUntil: addDays(now, induction.validDays) },
+      data: { inductionValidUntil: addDays(now, ind.validDays) },
     }),
   ]);
   redirect(`/v/${code}`);

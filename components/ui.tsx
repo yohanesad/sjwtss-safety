@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 
 export const inputClass =
@@ -47,67 +46,5 @@ export function FormError({ message }: { message?: string }) {
 
 /** Panel merah berisi teks putih, untuk pengantar tiap langkah. */
 export function Intro({ children }: { children: ReactNode }) {
-  return <div className="mb-4 bg-brand-600 px-4 py-4 text-base leading-snug text-white">{children}</div>;
-}
-
-/**
- * Kerangka halaman pengunjung: pita merah di atas, banner judul putih,
- * isi dalam bingkai merah putus-putus, footer abu-abu.
- */
-export function VisitorShell({
-  title,
-  step,
-  children,
-}: {
-  title: string;
-  step?: { current: number; total: number; label: string };
-  children: ReactNode;
-}) {
-  return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-white shadow-sm">
-      <header className="bg-brand-600 px-4 pb-10 pt-4 text-white">
-        <div className="flex items-center justify-between gap-3">
-          <Image src="/logo-putih.png" alt="SCG" width={520} height={171} priority className="h-11 w-auto" />
-          <span className="text-lg font-bold italic">Keselamatan Utama</span>
-        </div>
-      </header>
-
-      <div className="-mt-7 px-4">
-        <h1 className="mx-auto border-2 border-brand-600 bg-white px-3 py-2 text-center text-3xl font-extrabold leading-tight text-brand-600 shadow-[0_3px_0_rgba(0,0,0,0.18)]">
-          {title}
-        </h1>
-      </div>
-
-      <main className="flex-1 px-4 pb-6 pt-5">
-        <div className="rounded-xl border-2 border-dashed border-brand-600 p-3">
-          {step ? (
-            <div className="mb-4">
-              <div className="mb-1 flex justify-between text-sm font-bold text-brand-600">
-                <span>
-                  Langkah {step.current} dari {step.total}
-                </span>
-                <span>{step.label}</span>
-              </div>
-              <div className="flex gap-1">
-                {Array.from({ length: step.total }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`h-2 flex-1 rounded-full ${i < step.current ? "bg-brand-600" : "bg-neutral-200"}`}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {children}
-        </div>
-        <p className="mx-auto mt-4 w-fit bg-brand-600 px-4 py-2 text-center text-sm font-bold italic text-white">
-          Wajib diselesaikan sebelum masuk area pabrik
-        </p>
-      </main>
-
-      <footer className="bg-neutral-400 px-4 py-4 text-center text-xs font-bold text-white">
-        Ada kendala? Hubungi security di pos jaga.
-      </footer>
-    </div>
-  );
+  return <div className="mb-4 whitespace-pre-line bg-brand-600 px-4 py-4 text-base leading-snug text-white">{children}</div>;
 }

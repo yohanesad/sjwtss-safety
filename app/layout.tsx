@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { getContent } from "@/lib/content";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,12 +14,15 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const c = await getContent();
   return (
     <html lang="id">
       <head>
+        {/* Warna utama dari halaman Konten (sudah divalidasi sebagai #rrggbb). */}
+        <style dangerouslySetInnerHTML={{ __html: c.brandStyle }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         {/* App Router: head di root layout berlaku untuk semua halaman, aturan lint ini khusus pages/ */}

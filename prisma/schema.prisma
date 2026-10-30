@@ -126,3 +126,18 @@ model Question {
 
   @@index([active, position])
 }
+
+/// Teks & pengaturan yang diubah admin lewat halaman Konten. Tanpa baris = pakai nilai bawaan.
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// Berkas kecil yang diunggah admin (logo). Disimpan di database agar tidak butuh storage terpisah.
+model SiteAsset {
+  key         String   @id
+  contentType String
+  data        Bytes
+  updatedAt   DateTime @updatedAt
+}

@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
-import { Card, Intro, VisitorShell } from "@/components/ui";
+import { Card, Intro } from "@/components/ui";
+import { VisitorShell } from "@/components/visitor-shell";
+import { getContent, getInduction } from "@/lib/content";
 import { prisma } from "@/lib/db";
-import { induction } from "@/lib/env";
+import { fill } from "@/lib/content-fields";
 import { formatDate, formatDateLocal, formatDateTime } from "@/lib/format";
 import { getOrigin } from "@/lib/origin";
 import { qrSvg } from "@/lib/qr";
-import { COMMITMENT_PROMPT, formatVisitCode, normalizeVisitCode, shuffle } from "@/lib/visit";
+import { formatVisitCode, normalizeVisitCode, shuffle } from "@/lib/visit";
 import AutoRefresh from "./auto-refresh";
 import QuizForm from "./quiz-form";
 import VideoPlayer from "./video-player";
@@ -26,11 +28,15 @@ export default async function VisitPage({
   const visit = await prisma.visit.findUnique({ where: { code }, include: { visitor: true } });
   if (!visit) notFound();
 
+  const c = await getContent();
+  const t = c.v;
+  const ind = await getInduction();
+
   if (visit.status === "VIDEO") {
     return (
-      <VisitorShell title="Video Induksi" step={{ current: 2, total: 4, label: "Video" }}>
-        <Intro>Putar video sampai selesai. Video tidak bisa dipercepat atau dilompati. Nyalakan suara.</Intro>
-        <VideoPlayer code={code} src={induction.videoSrc} youtubeId={induction.youtube} />
+      <VisitorShell title={t.videoTitle} step={{ current: 2, total: 4, label: t.stepLabel2 }}>
+        <Intro>{t.videoIntro}</Intro>
+        <VideoPlayer code={code} src={ind.videoSrc} youtubeId={ind.youtubeId} t={t} />
       </VisitorShell>
     );
   }
@@ -47,16 +53,14 @@ export default async function VisitPage({
       options: shuffle(q.options.map((label, index) => ({ label, index }))),
     }));
     return (
-      <VisitorShell title="Pertanyaan" step={{ current: 3, total: 4, label: "Pertanyaan" }}>
-        <Intro>
-          Semua jawaban harus benar ({induction.passPercent}%) untuk lulus. Anda boleh mengulang bila belum lulus.
-        </Intro>
+      <VisitorShell title={t.quizTitle} step={{ current: 3, total: 4, label: t.stepLabel3 }}>
+        <Intro>{fill(t.quizIntro, { nilai: ind.passPercent })}</Intro>
         {gagal ? (
-          <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            Nilai Anda {Number(gagal) || 0}%. Untuk lulus semua jawaban harus benar ({induction.passPercent}%). Silakan coba lagi.
+          <div role="alert" className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {fill(t.quizFail, { skor: Number(gagal) || 0, nilai: ind.passPercent })}
           </div>
         ) : null}
-        <QuizForm code={code} questions={view} commitmentPrompt={COMMITMENT_PROMPT} />
+        <QuizForm code={code} questions={view} t={t} />
       </VisitorShell>
     );
   }
@@ -64,17 +68,16 @@ export default async function VisitPage({
   if (visit.status === "WAITING_SECURITY") {
     const origin = await getOrigin();
     const svg = await qrSvg(`${origin}/admin/kode/${code}`);
+    const intro =
+      visit.inductionSkipped && visit.visitor.inductionValidUntil
+        ? fill(t.waitIntroSkipped, { tanggal: formatDateLocal(visit.visitor.inductionValidUntil) })
+        : t.waitIntro;
     return (
-      <VisitorShell title="Hampir Selesai" step={{ current: 4, total: 4, label: "Konfirmasi security" }}>
+      <VisitorShell title={t.waitTitle} step={{ current: 4, total: 4, label: t.stepLabel4 }}>
         <AutoRefresh seconds={5} />
-        <Intro>
-          {visit.inductionSkipped
-            ? `Induksi Anda masih berlaku sampai ${formatDateLocal(visit.visitor.inductionValidUntil!)}. `
-            : "Induksi Anda sudah selesai. "}
-          <strong>Tunjukkan layar ini kepada security</strong> untuk konfirmasi dan mengambil stiker pass.
-        </Intro>
+        <Intro>{intro}</Intro>
         <Card className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Kode kunjungan</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{t.codeLabel}</p>
           <p className="my-2 font-mono text-4xl font-extrabold tracking-wider text-brand-600">{formatVisitCode(code)}</p>
           <div
             className="mx-auto my-3 w-56 max-w-full [&>svg]:h-auto [&>svg]:w-full"
@@ -83,7 +86,7 @@ export default async function VisitPage({
           />
           <p className="font-semibold">{visit.fullName}</p>
           <p className="text-sm text-[var(--muted)]">{visit.company}</p>
-          <p className="mt-3 text-xs text-[var(--muted)]">Halaman ini diperbarui otomatis setelah security menyetujui.</p>
+          <p className="mt-3 text-xs text-[var(--muted)]">{t.waitNote}</p>
         </Card>
       </VisitorShell>
     );
@@ -91,19 +94,17 @@ export default async function VisitPage({
 
   if (visit.status === "APPROVED") {
     return (
-      <VisitorShell title="Disetujui">
+      <VisitorShell title={t.approvedTitle}>
         <Card className="border-green-300 bg-green-50 text-center">
           <p className="text-5xl">✅</p>
-          <p className="mt-1 text-sm text-green-900">
-            Ambil stiker pass pengunjung dari security dan tempelkan di pakaian Anda.
-          </p>
+          <p className="mt-2 whitespace-pre-line text-sm text-green-900">{t.approvedText}</p>
           {visit.stickerNumber ? (
             <p className="mt-4 text-sm">
-              Nomor stiker: <strong className="font-mono text-lg">{visit.stickerNumber}</strong>
+              {t.stickerLabel} <strong className="font-mono text-lg">{visit.stickerNumber}</strong>
             </p>
           ) : null}
           <p className="mt-3 text-xs text-green-900/80">
-            Berlaku {formatDate(visit.visitDate)}
+            {formatDate(visit.visitDate)}
             {visit.estimatedHours ? ` · perkiraan ${visit.estimatedHours} jam` : ""}
           </p>
         </Card>
@@ -113,22 +114,20 @@ export default async function VisitPage({
 
   if (visit.status === "REJECTED") {
     return (
-      <VisitorShell title="Belum Dapat Masuk">
+      <VisitorShell title={t.rejectedTitle}>
         <Card className="border-red-300 bg-red-50 text-center">
-          <p className="text-sm text-red-900">
-            {visit.rejectedReason || "Silakan hubungi security untuk penjelasan."}
-          </p>
+          <p className="whitespace-pre-line text-sm text-red-900">{visit.rejectedReason || t.rejectedDefault}</p>
         </Card>
       </VisitorShell>
     );
   }
 
   return (
-    <VisitorShell title="Terima Kasih">
+    <VisitorShell title={t.doneTitle}>
       <Card className="text-center">
-        <p className="text-sm text-[var(--muted)]">
-          Kunjungan Anda telah selesai
-          {visit.checkedOutAt ? ` (keluar ${formatDateTime(visit.checkedOutAt)})` : ""}. Hati-hati di jalan.
+        <p className="whitespace-pre-line text-sm text-[var(--muted)]">
+          {t.doneText}
+          {visit.checkedOutAt ? ` (keluar ${formatDateTime(visit.checkedOutAt)})` : ""}
         </p>
       </Card>
     </VisitorShell>

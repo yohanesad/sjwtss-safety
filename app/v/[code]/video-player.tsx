@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { completeVideoAction, startVideoAction } from "@/app/actions";
 import { primaryButton, secondaryButton } from "@/components/ui";
+import type { Content } from "@/lib/content";
 
 /**
  * Pemutar tanpa kontrol bawaan: tidak ada seek, tidak ada percepatan, dan
@@ -31,10 +32,12 @@ export default function VideoPlayer({
   code,
   src,
   youtubeId,
+  t,
 }: {
   code: string;
   src: string;
   youtubeId: string | null;
+  t: Content["v"];
 }) {
   const router = useRouter();
   const controlsRef = useRef<Controls | null>(null);
@@ -132,13 +135,13 @@ export default function VideoPlayer({
 
       {directTap && !playing ? (
         <p role="status" className="rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm">
-          Ketuk langsung pada video untuk memulai.
+          {t.tapHint}
         </p>
       ) : null}
 
       {loadFailed ? (
         <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          Video tidak dapat dimuat. Periksa sinyal Anda, muat ulang halaman, atau hubungi security.
+          {t.videoError}
           {failReason ? <span className="mt-1 block text-xs opacity-80">Rincian: {failReason}</span> : null}
         </p>
       ) : null}
@@ -153,7 +156,7 @@ export default function VideoPlayer({
         disabled={phase !== "watching"}
         className={`${secondaryButton} w-full`}
       >
-        {playing ? "⏸ Jeda" : "▶ Putar"}
+        {playing ? t.buttonPause : t.buttonPlay}
       </button>
 
       {error ? (
@@ -168,7 +171,7 @@ export default function VideoPlayer({
         onClick={() => router.refresh()}
         className={primaryButton}
       >
-        {phase === "done" ? "Lanjut ke pertanyaan" : phase === "finishing" ? "Menyimpan…" : "Tonton sampai selesai untuk lanjut"}
+        {phase === "done" ? t.buttonReady : phase === "finishing" ? t.buttonSaving : t.buttonWait}
       </button>
     </div>
   );

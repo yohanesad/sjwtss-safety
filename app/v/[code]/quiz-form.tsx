@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Card, FormError, inputClass, primaryButton } from "@/components/ui";
 import { submitQuizAction, type FormState } from "@/app/actions";
+import type { Content } from "@/lib/content";
 
 interface QuestionView {
   id: string;
@@ -14,11 +15,11 @@ interface QuestionView {
 export default function QuizForm({
   code,
   questions,
-  commitmentPrompt,
+  t,
 }: {
   code: string;
   questions: QuestionView[];
-  commitmentPrompt: string;
+  t: Content["v"];
 }) {
   const [state, action] = useActionState<FormState, FormData>(submitQuizAction.bind(null, code), {});
 
@@ -54,23 +55,23 @@ export default function QuizForm({
 
       <Card>
         <label className="block">
-          <span className="mb-2 block text-base font-semibold">Komitmen keselamatan</span>
-          <span className="mb-2 block text-sm text-[var(--muted)]">{commitmentPrompt}</span>
+          <span className="mb-2 block text-base font-semibold">{t.commitmentLabel}</span>
+          <span className="mb-2 block text-sm text-[var(--muted)]">{t.commitmentPrompt}</span>
           <textarea name="commitment" required minLength={20} maxLength={1000} rows={4} className={inputClass} />
         </label>
       </Card>
 
       <FormError message={state.error} />
-      <SubmitButton />
+      <SubmitButton t={t} />
     </form>
   );
 }
 
-function SubmitButton() {
+function SubmitButton({ t }: { t: Content["v"] }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className={primaryButton}>
-      {pending ? "Memeriksa jawaban…" : "Kirim jawaban"}
+      {pending ? t.buttonChecking : t.buttonSubmitQuiz}
     </button>
   );
 }

@@ -6,7 +6,9 @@ import { z } from "zod";
 import { destroySession, createSession } from "@/lib/auth/session";
 import { requireAdmin, requireStaff } from "@/lib/auth/guard";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { fieldsOfGroup, MAX_LOGO_BYTES, sniffImageType, validateField, type GroupId } from "@/lib/content-fields";
 import { prisma } from "@/lib/db";
+import { parseYouTubeId } from "@/lib/video";
 
 export interface FormState {
   error?: string;
@@ -175,4 +177,75 @@ export async function deleteQuestionAction(id: string): Promise<void> {
   await requireAdmin();
   await prisma.question.deleteMany({ where: { id } });
   revalidatePath("/admin/soal");
+}
+
+// ---------------------------------------------------------------- konten situs (admin)
+
+export interface ContentState extends FormState {
+  /** Menandai hasil terakhir agar form bisa menampilkan pesan per bagian. */
+  group?: string;
+}
+
+/** Menyimpan semua kolom satu bagian. Kolom kosong atau sama dengan bawaan = kembali ke bawaan. */
+export async function saveContentAction(
+  groupId: GroupId,
+  _prev: ContentState,
+  formData: FormData,
+): Promise<ContentState> {
+  await requireAdmin();
+  const reset = formData.get("intent") === "reset";
+  const fields = fieldsOfGroup(groupId);
+
+  const toSave: { key: string; value: string }[] = [];
+  const toClear: string[] = [];
+  const errors: string[] = [];
+
+  for (const { key, def } of fields) {
+    // Browser mengirim baris baru textarea sebagai CRLF; samakan agar perbandingan dengan bawaan tepat.
+    const raw = reset ? "" : String(formData.get(key) ?? "").replace(/\r\n/g, "\n").trim();
+    const error = validateField(key, raw, parseYouTubeId);
+    if (error) {
+      errors.push(error);
+      continue;
+    }
+    if (raw === "" || raw === def.default()) toClear.push(key);
+    else toSave.push({ key, value: raw });
+  }
+  // Semua-atau-tidak-sama-sekali: satu kolom salah, tidak ada yang tersimpan.
+  if (errors.length) return { group: groupId, error: errors.join("\n") };
+
+  await prisma.$transaction([
+    prisma.siteSetting.deleteMany({ where: { key: { in: toClear } } }),
+    ...toSave.map((s) =>
+      prisma.siteSetting.upsert({ where: { key: s.key }, create: s, update: { value: s.value } }),
+    ),
+  ]);
+  revalidatePath("/", "layout");
+  return { group: groupId, ok: reset ? "Dikembalikan ke bawaan." : "Tersimpan. Perubahan langsung berlaku." };
+}
+
+export async function uploadLogoAction(_prev: ContentState, formData: FormData): Promise<ContentState> {
+  await requireAdmin();
+  const file = formData.get("logo");
+  if (!(file instanceof File) || file.size === 0) return { group: "logo", error: "Pilih berkas gambar dulu." };
+  if (file.size > MAX_LOGO_BYTES) {
+    return { group: "logo", error: `Ukuran berkas maksimal ${Math.round(MAX_LOGO_BYTES / 1024)} KB.` };
+  }
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const type = sniffImageType(bytes);
+  if (!type) return { group: "logo", error: "Format harus PNG, JPEG, atau WebP (SVG tidak diterima)." };
+
+  await prisma.siteAsset.upsert({
+    where: { key: "logo" },
+    create: { key: "logo", contentType: type, data: bytes },
+    update: { contentType: type, data: bytes },
+  });
+  revalidatePath("/", "layout");
+  return { group: "logo", ok: "Logo diganti." };
+}
+
+export async function resetLogoAction(): Promise<void> {
+  await requireAdmin();
+  await prisma.siteAsset.deleteMany({ where: { key: "logo" } });
+  revalidatePath("/", "layout");
 }

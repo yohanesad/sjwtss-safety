@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui";
 import { requireAdminPage } from "@/lib/auth/guard";
 import { prisma } from "@/lib/db";
-import { induction } from "@/lib/env";
+import { getInduction } from "@/lib/content";
 import { deleteQuestionAction, toggleQuestionAction } from "../../actions";
 import QuestionForm from "./question-form";
 
@@ -11,6 +11,7 @@ export const metadata = { title: "Soal · Panel Security" };
 export default async function QuestionsPage() {
   await requireAdminPage();
   const questions = await prisma.question.findMany({ orderBy: [{ position: "asc" }, { createdAt: "asc" }] });
+  const ind = await getInduction();
   const activeCount = questions.filter((q) => q.active).length;
 
   return (
@@ -18,7 +19,7 @@ export default async function QuestionsPage() {
       <div>
         <h1 className="text-2xl font-bold">Soal pilihan ganda</h1>
         <p className="text-sm text-[var(--muted)]">
-          {activeCount} soal aktif dari {questions.length}. Lulus bila ≥ {induction.passPercent}%.
+          {activeCount} soal aktif dari {questions.length}. Lulus bila ≥ {ind.passPercent}%.
           Rencana awal: 15 soal. Soal bawaan hanyalah contoh — ganti dengan soal sesuai aturan pabrik Anda.
         </p>
       </div>

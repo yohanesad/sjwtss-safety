@@ -23,6 +23,9 @@ npm run dev
 ```
 Panel security: `/admin` · Tes: `npm test`
 
+## Mengubah konten tanpa kode
+Admin membuka **Konten** di panel: semua teks halaman pengunjung, warna utama, logo, sumber video (YouTube atau MP4), durasi video, nilai lulus, masa berlaku induksi, dan teks poster. Kosongkan kolom lalu simpan untuk kembali ke bawaan. Nilai di `.env` hanya menjadi bawaan; halaman Konten menimpanya.
+
 ## Yang perlu diketahui
 - Video YouTube: kontrol disembunyikan, lompatan maju dikembalikan, kecepatan dikunci. Pemutar belum diuji dengan YouTube asli (hanya tiruan API), jadi uji di HP Android dan iPhone sebelum dipakai. Jaringan pabrik harus bisa membuka youtube.com.
 - Anti-skip video di browser bukan jaminan mutlak (HP bisa dibiarkan memutar). Lapis lainnya: kuis, isian komitmen, dan konfirmasi tatap muka security.

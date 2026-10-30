@@ -1,19 +1,18 @@
-import { Intro, VisitorShell } from "@/components/ui";
+import { Intro } from "@/components/ui";
+import { VisitorShell } from "@/components/visitor-shell";
+import { getContent } from "@/lib/content";
 import { todayJakarta } from "@/lib/format";
-import { PURPOSES } from "@/lib/visit";
 import BiodataForm from "./biodata-form";
 
-// Tanggal "hari ini" harus dihitung per request, bukan dibekukan saat build.
+// Tanggal "hari ini" dan konten situs harus dibaca per request, bukan dibekukan saat build.
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const c = await getContent();
   return (
-    <VisitorShell title="Induksi Keselamatan" step={{ current: 1, total: 4, label: "Data diri" }}>
-      <Intro>
-        Keselamatan seluruh pengunjung adalah hal terpenting di pabrik kami. Isi data diri singkat, tonton
-        video induksi, jawab pertanyaan, lalu temui security untuk mendapatkan stiker pass.
-      </Intro>
-      <BiodataForm today={todayJakarta()} purposes={[...PURPOSES]} />
+    <VisitorShell title={c.v.homeTitle} step={{ current: 1, total: 4, label: c.v.stepLabel1 }}>
+      <Intro>{c.v.homeIntro}</Intro>
+      <BiodataForm today={todayJakarta()} purposes={c.purposes} t={c.v} />
     </VisitorShell>
   );
 }

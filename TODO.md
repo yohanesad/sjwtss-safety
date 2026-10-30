@@ -18,6 +18,10 @@ Login, kuis, dan video YouTube sudah teruji dari sisi aplikasi.
 - [ ] Pertimbangkan branch `main`: produksi sekarang berjalan dari branch `claude/eloquent-bell-40vyhu`.
 - [ ] Cek paket Vercel: paket Hobby setahu saya untuk pemakaian non-komersial; aplikasi perusahaan mungkin perlu paket Pro/Team (cek syarat Vercel).
 
+## Konten (baru)
+- [ ] Coba halaman Admin > Konten di Vercel: ubah teks, warna, logo; pastikan perubahan tampil di halaman pengunjung.
+- [ ] `VIDEO_DURATION_SECONDS`, nilai lulus, dan sumber video kini juga bisa diatur di halaman Konten (menimpa environment variable).
+
 ## Akun
 - [ ] Buat akun admin sendiri di halaman Pengguna (peran Admin).
 - [ ] Nonaktifkan `Admin Sementara` (kata sandinya pernah tampil di chat).
