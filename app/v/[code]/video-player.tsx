@@ -24,7 +24,7 @@ interface MediaEvents {
   onPaused: () => void;
   onProgress: (percent: number) => void;
   onEnded: () => void;
-  onFailed: () => void;
+  onFailed: (reason?: string) => void;
 }
 
 export default function VideoPlayer({
@@ -47,6 +47,7 @@ export default function VideoPlayer({
   const [phase, setPhase] = useState<"watching" | "finishing" | "done">("watching");
   const [error, setError] = useState<string | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [failReason, setFailReason] = useState<string | null>(null);
   // Beberapa browser (iOS) hanya mau memutar YouTube bila pengguna mengetuk iframe-nya langsung.
   const [directTap, setDirectTap] = useState(false);
 
@@ -87,7 +88,10 @@ export default function VideoPlayer({
         setPhase("watching");
       }
     }, [code]),
-    onFailed: useCallback(() => setLoadFailed(true), []),
+    onFailed: useCallback((reason?: string) => {
+      setLoadFailed(true);
+      if (reason) setFailReason(reason);
+    }, []),
   };
 
   function togglePlay() {
@@ -135,6 +139,7 @@ export default function VideoPlayer({
       {loadFailed ? (
         <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           Video tidak dapat dimuat. Periksa sinyal Anda, muat ulang halaman, atau hubungi security.
+          {failReason ? <span className="mt-1 block text-xs opacity-80">Rincian: {failReason}</span> : null}
         </p>
       ) : null}
 
@@ -180,7 +185,7 @@ function Mp4Media({ src, onReady, onPlaying, onPaused, onProgress, onEnded, onFa
     if (!v) return;
     onReady({
       play: () => {
-        v.play().catch(onFailed);
+        v.play().catch(() => onFailed("berkas video tidak ditemukan atau tidak bisa diputar"));
       },
       pause: () => v.pause(),
     });
@@ -211,7 +216,7 @@ function Mp4Media({ src, onReady, onPlaying, onPaused, onProgress, onEnded, onFa
         if (e.currentTarget.playbackRate !== 1) e.currentTarget.playbackRate = 1;
       }}
       onEnded={onEnded}
-      onError={onFailed}
+      onError={() => onFailed("berkas video tidak ditemukan (VIDEO_YOUTUBE belum terbaca?)")}
     >
       <source src={src} type="video/mp4" />
     </video>
@@ -241,7 +246,7 @@ interface YTNamespace {
       events: {
         onReady: () => void;
         onStateChange: (e: { data: number }) => void;
-        onError: () => void;
+        onError: (e: { data: number }) => void;
       },
     },
   ) => YTPlayer;
@@ -251,6 +256,23 @@ declare global {
   interface Window {
     YT?: YTNamespace;
     onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+/** Kode galat IFrame API YouTube -> penjelasan singkat. */
+function youTubeError(code: number): string {
+  switch (code) {
+    case 2:
+      return "ID video YouTube tidak valid";
+    case 5:
+      return "galat pemutar HTML5 pada perangkat ini";
+    case 100:
+      return "video tidak ditemukan, dihapus, atau berstatus Private";
+    case 101:
+    case 150:
+      return "pemilik video tidak mengizinkan penyematan (aktifkan Allow embedding di YouTube Studio)";
+    default:
+      return `kode galat YouTube ${code}`;
   }
 }
 
@@ -340,7 +362,7 @@ function YouTubeMedia({
                 onEnded();
               }
             },
-            onError: onFailed,
+            onError: (e) => onFailed(youTubeError(e.data)),
           },
         });
 
@@ -358,7 +380,7 @@ function YouTubeMedia({
           if (d > 0) onProgress(Math.min(100, (t / d) * 100));
         }, 500);
       })
-      .catch(onFailed);
+      .catch(() => onFailed("skrip YouTube tidak dapat dimuat (jaringan memblokir youtube.com?)"));
 
     return () => {
       cancelled = true;
