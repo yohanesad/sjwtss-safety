@@ -141,7 +141,9 @@ export const F = {
   // ---------------------------------------------------------------- kuis
   quizTitle: t("kuis", "Judul halaman kuis", "Pertanyaan"),
   quizIntro: ta("kuis", "Kalimat pengantar kuis", "Semua jawaban harus benar ({nilai}%) untuk lulus. Anda boleh mengulang bila belum lulus.", "{nilai} diganti nilai lulus."),
-  quizFail: ta("kuis", "Pesan bila belum lulus", "Nilai Anda {skor}%. Untuk lulus semua jawaban harus benar ({nilai}%). Silakan coba lagi.", "{skor} diganti nilai pengunjung, {nilai} nilai lulus."),
+  quizFail: ta("kuis", "Pesan bila belum lulus", "Nilai Anda {skor}% ({benar} benar, {salah} salah). Untuk lulus semua jawaban harus benar ({nilai}%). Perbaiki soal yang bertanda merah; jawaban yang sudah benar tetap tersimpan.", "{skor} nilai pengunjung, {benar} jumlah benar, {salah} jumlah salah, {nilai} nilai lulus."),
+  quizCorrectLabel: t("kuis", "Tanda soal yang benar", "Benar"),
+  quizWrongLabel: t("kuis", "Tanda soal yang salah", "Salah, pilih jawaban lain"),
   commitmentLabel: t("kuis", "Judul isian komitmen", "Komitmen keselamatan"),
   commitmentPrompt: ta("kuis", "Petunjuk isian komitmen", "Tuliskan komitmen Anda untuk menjaga keselamatan diri sendiri dan orang lain selama berada di area pabrik."),
   buttonSubmitQuiz: t("kuis", "Tombol kirim jawaban", "Kirim jawaban"),

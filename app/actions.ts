@@ -213,6 +213,8 @@ export async function submitQuizAction(
   });
 
   if (!result.passed) {
+    // Simpan komitmen yang sudah diketik agar tidak perlu menulis ulang saat mengulang.
+    await prisma.visit.update({ where: { id: visit.id }, data: { commitmentText: commitment } });
     redirect(`/v/${code}?gagal=${result.percent}`);
   }
 

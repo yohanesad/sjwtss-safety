@@ -56,21 +56,48 @@ export default async function VisitPage({
       where: { active: true },
       orderBy: [{ position: "asc" }, { createdAt: "asc" }],
     });
-    // Soal & pilihan diacak; jawaban benar tidak ikut dikirim ke browser.
-    const view = shuffle(questions).map((q) => ({
-      id: q.id,
-      text: q.text,
-      options: shuffle(q.options.map((label, index) => ({ label, index }))),
-    }));
+    // Percobaan terakhir yang gagal: tandai tiap soal benar/salah agar pengunjung hanya memperbaiki yang salah.
+    const last = await prisma.quizAttempt.findFirst({
+      where: { visitId: visit.id },
+      orderBy: { createdAt: "desc" },
+    });
+    const previous = (last?.answers ?? null) as Record<string, number> | null;
+    const marked = questions.map((q) => {
+      const chosen = previous?.[q.id];
+      const state = typeof chosen !== "number" ? null : chosen === q.correctIndex ? ("correct" as const) : ("wrong" as const);
+      return { q, chosen: typeof chosen === "number" ? chosen : null, state };
+    });
+    const wrongCount = marked.filter((m) => m.state === "wrong").length;
+    const correctCount = marked.filter((m) => m.state === "correct").length;
+    const retry = last !== null && wrongCount > 0;
+
+    // Percobaan pertama: soal & pilihan diacak. Mengulang: urutan tetap, soal salah di atas.
+    // Jawaban benar tidak pernah ikut dikirim ke browser; hanya status benar/salah soal yang pernah dijawab.
+    const ordered = retry ? [...marked].sort((a, b) => Number(b.state === "wrong") - Number(a.state === "wrong")) : shuffle(marked);
+    const view = ordered.map(({ q, chosen, state }) => {
+      const opts = q.options.map((label, index) => ({ label, index }));
+      return {
+        id: q.id,
+        text: q.text,
+        options: retry ? opts : shuffle(opts),
+        state: retry ? state : null,
+        chosen: retry ? chosen : null,
+      };
+    });
     return (
       <VisitorShell title={t.quizTitle} step={{ current: 4, total: 5, label: t.stepQuiz }}>
         <Intro>{fill(t.quizIntro, { nilai: ind.passPercent })}</Intro>
-        {gagal ? (
+        {retry || gagal ? (
           <div role="alert" className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            {fill(t.quizFail, { skor: Number(gagal) || 0, nilai: ind.passPercent })}
+            {fill(t.quizFail, {
+              skor: last?.percent ?? (Number(gagal) || 0),
+              benar: correctCount,
+              salah: wrongCount,
+              nilai: ind.passPercent,
+            })}
           </div>
         ) : null}
-        <QuizForm code={code} questions={view} t={t} />
+        <QuizForm key={last?.id ?? "baru"} code={code} questions={view} t={t} draft={visit.commitmentText ?? ""} />
       </VisitorShell>
     );
   }
