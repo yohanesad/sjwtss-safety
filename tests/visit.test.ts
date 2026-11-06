@@ -112,3 +112,20 @@ describe("parseYouTubeId", () => {
     expect(parseYouTubeId("https://example.com/video.mp4")).toBeNull();
   });
 });
+
+import { isValidNik, maskNik, normalizeNik } from "@/lib/visit";
+
+describe("NIK", () => {
+  it("menormalkan pemisah dan memeriksa 16 digit", () => {
+    expect(normalizeNik("3201 1234-5678.9012")).toBe("3201123456789012");
+    expect(isValidNik("3201 1234 5678 9012")).toBe(true);
+    expect(isValidNik("320112345678901")).toBe(false);
+    expect(isValidNik("32011234567890123")).toBe(false);
+    expect(isValidNik("3201123456789O12")).toBe(false);
+  });
+  it("menyamarkan bagian tengah", () => {
+    expect(maskNik("3201123456780001")).toBe("3201********0001");
+    expect(maskNik(null)).toBe("");
+    expect(maskNik("1234")).toBe("****");
+  });
+});

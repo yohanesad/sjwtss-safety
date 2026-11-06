@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Card } from "@/components/ui";
 import { prisma } from "@/lib/db";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { formatVisitCode } from "@/lib/visit";
+import { formatVisitCode, GENDER_LABEL } from "@/lib/visit";
 import { checkoutVisitAction } from "../../../actions";
 import DecisionForms from "./decision-forms";
 
@@ -31,7 +31,12 @@ export default async function VisitDetailPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const v = await prisma.visit.findUnique({
     where: { id },
-    include: { attempts: { orderBy: { createdAt: "asc" } }, decidedBy: { select: { name: true } }, visitor: true },
+    include: {
+      attempts: { orderBy: { createdAt: "asc" } },
+      decidedBy: { select: { name: true } },
+      visitor: true,
+      photo: { select: { createdAt: true } },
+    },
   });
   if (!v) notFound();
 
@@ -52,6 +57,7 @@ export default async function VisitDetailPage({ params }: { params: Promise<{ id
         <h2 className="mb-2 font-bold">Status induksi</h2>
         <ul className="space-y-1">
           <Check ok>Biodata terisi &amp; persetujuan data pribadi ({formatDateTime(v.consentAt)})</Check>
+          <Check ok={v.photo !== null}>{v.photo ? `Foto diri diambil (${formatDateTime(v.photo.createdAt)})` : "Foto diri belum diambil"}</Check>
           <Check ok={videoOk}>
             {v.inductionSkipped
               ? "Video dilewati — induksi sebelumnya masih berlaku"
@@ -75,6 +81,32 @@ export default async function VisitDetailPage({ params }: { params: Promise<{ id
         ) : null}
       </Card>
 
+      <Card>
+        <h2 className="mb-3 font-bold">Identitas</h2>
+        <div className="flex flex-wrap gap-5">
+          {v.photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/admin/foto/${v.id}`}
+              alt={`Foto ${v.fullName}`}
+              className="h-56 w-44 rounded-xl border border-[var(--border)] object-cover"
+            />
+          ) : (
+            <div className="flex h-56 w-44 items-center justify-center rounded-xl border border-dashed border-[var(--border)] px-3 text-center text-sm text-[var(--muted)]">
+              Belum ada foto
+            </div>
+          )}
+          <dl className="min-w-60 flex-1">
+            <Row label="NIK"><span className="font-mono">{v.nik}</span></Row>
+            <Row label="Nama">{v.fullName}</Row>
+            <Row label="Jenis kelamin">{v.gender ? GENDER_LABEL[v.gender] : null}</Row>
+            <Row label="PT / perusahaan">{v.company}</Row>
+            <Row label="HP">{v.phone}</Row>
+          </dl>
+        </div>
+        <p className="mt-3 text-xs text-[var(--muted)]">Cocokkan wajah dan NIK dengan KTP pengunjung sebelum menyetujui.</p>
+      </Card>
+
       <div className="grid gap-5 md:grid-cols-2">
         <Card>
           <h2 className="mb-1 font-bold">Data kunjungan</h2>
@@ -85,12 +117,6 @@ export default async function VisitDetailPage({ params }: { params: Promise<{ id
             <Row label="Tanggal">{formatDate(v.visitDate)}</Row>
             <Row label="Perkiraan lama">{v.estimatedHours ? `${v.estimatedHours} jam` : null}</Row>
             <Row label="Kendaraan">{v.vehiclePlate}</Row>
-          </dl>
-        </Card>
-        <Card>
-          <h2 className="mb-1 font-bold">Kontak</h2>
-          <dl>
-            <Row label="HP">{v.phone}</Row>
           </dl>
         </Card>
       </div>

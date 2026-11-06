@@ -21,17 +21,43 @@ export default function BiodataForm({
     <form action={action} className="space-y-4">
       <Card className="space-y-4">
         <h2 className="text-sm font-bold uppercase tracking-wide text-brand-600">{t.sectionPerson}</h2>
+        <Field label={t.labelNik} hint={t.hintNik}>
+          <input
+            name="nik"
+            required
+            inputMode="numeric"
+            autoComplete="off"
+            pattern="[0-9 .\-]{16,22}"
+            maxLength={22}
+            className={inputClass}
+            placeholder="3201xxxxxxxxxxxx"
+          />
+        </Field>
         <Field label={t.labelFullName}>
           <input name="fullName" required autoComplete="name" className={inputClass} />
         </Field>
         <Field label={t.labelCompany}>
           <input name="company" required autoComplete="organization" className={inputClass} />
         </Field>
+        <fieldset>
+          <legend className="mb-1.5 text-sm font-medium">{t.labelGender}</legend>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { value: "LAKI_LAKI", label: t.optionMale },
+              { value: "PEREMPUAN", label: t.optionFemale },
+            ].map((o) => (
+              <label
+                key={o.value}
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--border)] px-4 py-3 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
+              >
+                <input type="radio" name="gender" value={o.value} required className="h-5 w-5 accent-red-600" />
+                <span>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <Field label={t.labelPhone}>
           <input name="phone" type="tel" inputMode="tel" required autoComplete="tel" className={inputClass} placeholder="08xx xxxx xxxx" />
-        </Field>
-        <Field label={t.labelVehicle} hint={t.hintVehicle}>
-          <input name="vehiclePlate" autoCapitalize="characters" className={inputClass} placeholder="B 1234 XYZ" />
         </Field>
       </Card>
 
@@ -63,8 +89,10 @@ export default function BiodataForm({
             <input name="estimatedHours" type="number" inputMode="numeric" min={1} max={72} className={inputClass} placeholder="mis. 3" />
           </Field>
         </div>
+        <Field label={t.labelVehicle} hint={t.hintVehicle}>
+          <input name="vehiclePlate" autoCapitalize="characters" className={inputClass} placeholder="B 1234 XYZ" />
+        </Field>
       </Card>
-
 
       <label className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 text-sm">
         <input name="consent" type="checkbox" required className="mt-0.5 h-5 w-5 shrink-0 accent-red-600" />

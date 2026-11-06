@@ -249,3 +249,17 @@ export async function resetLogoAction(): Promise<void> {
   await prisma.siteAsset.deleteMany({ where: { key: "logo" } });
   revalidatePath("/", "layout");
 }
+
+// ---------------------------------------------------------------- penyimpanan data pribadi (admin)
+
+/** Menghapus foto kunjungan yang lebih tua dari N hari. Data kunjungan lainnya tidak disentuh. */
+export async function deleteOldPhotosAction(_prev: ContentState, formData: FormData): Promise<ContentState> {
+  await requireAdmin();
+  const days = Number(String(formData.get("days") ?? ""));
+  if (!Number.isInteger(days) || days < 0 || days > 3650) {
+    return { group: "retensi", error: "Isi jumlah hari 0–3650." };
+  }
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const res = await prisma.visitPhoto.deleteMany({ where: { createdAt: { lt: cutoff } } });
+  return { group: "retensi", ok: `${res.count} foto dihapus.` };
+}

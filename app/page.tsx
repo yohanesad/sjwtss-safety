@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const c = await getContent();
   return (
-    <VisitorShell title={c.v.homeTitle} step={{ current: 1, total: 4, label: c.v.stepLabel1 }}>
+    <VisitorShell title={c.v.homeTitle} step={{ current: 1, total: 5, label: c.v.stepData }}>
       <Intro>{c.v.homeIntro}</Intro>
       <BiodataForm today={todayJakarta()} purposes={c.purposes} t={c.v} />
     </VisitorShell>

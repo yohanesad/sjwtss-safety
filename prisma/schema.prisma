@@ -16,12 +16,18 @@ enum UserRole {
 
 /// Urutan langkah pengunjung. Status hanya boleh maju lewat server action.
 enum VisitStatus {
+  PHOTO             // biodata sudah diisi, menunggu foto diri
   VIDEO             // biodata sudah diisi, menunggu video selesai
   QUIZ              // video selesai, mengerjakan kuis
   WAITING_SECURITY  // kuis lulus (atau induksi lama masih berlaku), menunggu security
   APPROVED          // disetujui security, stiker diberikan
   REJECTED          // ditolak security
   CHECKED_OUT       // sudah keluar
+}
+
+enum Gender {
+  LAKI_LAKI
+  PEREMPUAN
 }
 
 /// Akun admin dan petugas security.
@@ -40,7 +46,9 @@ model User {
 /// Orang yang pernah berkunjung. Dikenali dari nomor HP (sudah dinormalkan).
 model Visitor {
   id                  String    @id @default(cuid())
-  phone               String    @unique
+  /// NIK (16 digit). Pengenal utama pengunjung; null hanya untuk data lama sebelum NIK diwajibkan.
+  nik                 String?   @unique
+  phone               String
   fullName            String
   company             String
   /// Induksi dianggap berlaku sampai tanggal ini; null = belum pernah lulus.
@@ -59,6 +67,8 @@ model Visit {
   visitor   Visitor  @relation(fields: [visitorId], references: [id])
 
   // Biodata (disalin per kunjungan agar riwayat tidak berubah)
+  nik            String?
+  gender         Gender?
   fullName       String
   company        String
   phone          String
@@ -93,7 +103,9 @@ model Visit {
   updatedAt DateTime @updatedAt
 
   attempts QuizAttempt[]
+  photo    VisitPhoto?
 
+  @@index([nik])
   @@index([status, createdAt])
   @@index([visitDate])
 }
@@ -140,4 +152,15 @@ model SiteAsset {
   contentType String
   data        Bytes
   updatedAt   DateTime @updatedAt
+}
+
+/// Foto diri pengunjung, satu per kunjungan. Terpisah dari Visit agar daftar kunjungan tidak memuat gambar.
+model VisitPhoto {
+  visitId     String   @id
+  visit       Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  contentType String
+  data        Bytes
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }

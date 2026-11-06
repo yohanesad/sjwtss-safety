@@ -3,8 +3,15 @@ import { requireAdminPage } from "@/lib/auth/guard";
 import { getContent } from "@/lib/content";
 import { fieldsOfGroup, GROUPS } from "@/lib/content-fields";
 import { resetLogoAction } from "../../actions";
+import { prisma } from "@/lib/db";
 import ContentGroupForm from "./content-form";
 import LogoForm from "./logo-form";
+import RetentionForm from "./retention-form";
+
+/** Umur dalam hari; fungsi terpisah karena Date.now() tidak boleh dipanggil langsung saat render. */
+function daysSince(date: Date): number {
+  return Math.floor((Date.now() - date.getTime()) / 86_400_000);
+}
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Konten · Panel Security" };
@@ -12,6 +19,11 @@ export const metadata = { title: "Konten · Panel Security" };
 export default async function ContentPage() {
   await requireAdminPage();
   const c = await getContent();
+  const [photoCount, oldest] = await Promise.all([
+    prisma.visitPhoto.count(),
+    prisma.visitPhoto.findFirst({ orderBy: { createdAt: "asc" }, select: { createdAt: true } }),
+  ]);
+  const oldestDays = oldest ? daysSince(oldest.createdAt) : null;
 
   return (
     <div className="space-y-5">
@@ -67,6 +79,11 @@ export default async function ContentPage() {
           </div>
         </details>
       ))}
+
+      <Card>
+        <h2 className="mb-3 font-bold">Penyimpanan data pribadi</h2>
+        <RetentionForm photoCount={photoCount} oldestDays={oldestDays} />
+      </Card>
     </div>
   );
 }

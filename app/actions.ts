@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getInduction } from "@/lib/content";
+import { sniffImageType } from "@/lib/content-fields";
 import { dateOnly, todayJakarta } from "@/lib/format";
 import {
   addDays,
@@ -13,7 +14,10 @@ import {
   hasWatchedLongEnough,
   isInductionValid,
   isPlausiblePhone,
+  isValidNik,
+  normalizeNik,
   normalizePhone,
+  PHOTO_MAX_BYTES,
 } from "@/lib/visit";
 
 export interface FormState {
@@ -28,8 +32,10 @@ const text = (label: string, max = 120) =>
     .max(max, `${label} terlalu panjang.`);
 
 const biodataSchema = z.object({
+  nik: z.string().trim().refine(isValidNik, "NIK harus 16 digit angka."),
   fullName: text("Nama lengkap"),
-  company: text("Perusahaan/instansi"),
+  company: text("PT / perusahaan"),
+  gender: z.enum(["LAKI_LAKI", "PEREMPUAN"], "Pilih jenis kelamin."),
   phone: z.string().trim().refine(isPlausiblePhone, "Nomor HP tidak valid."),
   purpose: text("Tujuan kunjungan"),
   hostName: text("Orang yang dituju"),
@@ -44,7 +50,7 @@ const biodataSchema = z.object({
   consent: z.literal("on", "Anda harus menyetujui penggunaan data pribadi."),
 });
 
-/** Langkah 1: biodata -> buat kunjungan -> arahkan ke halaman kode kunjungan. */
+/** Langkah 1: biodata -> buat kunjungan (status PHOTO) -> arahkan ke halaman kunjungan. */
 export async function createVisitAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = biodataSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Data tidak valid." };
@@ -57,13 +63,15 @@ export async function createVisitAction(_prev: FormState, formData: FormData): P
   const now = new Date();
   const phone = normalizePhone(d.phone);
 
+  const nik = normalizeNik(d.nik);
+
   const visitor = await prisma.visitor.upsert({
-    where: { phone },
-    create: { phone, fullName: d.fullName, company: d.company },
-    update: { fullName: d.fullName, company: d.company },
+    where: { nik },
+    create: { nik, phone, fullName: d.fullName, company: d.company },
+    update: { phone, fullName: d.fullName, company: d.company },
   });
 
-  // Induksi masih berlaku -> video & kuis dilewati, langsung menunggu security.
+  // Induksi masih berlaku -> video & kuis dilewati setelah foto, lalu menunggu security.
   const skip = isInductionValid(visitor.inductionValidUntil, now);
 
   // Kode acak bisa (sangat jarang) bentrok; coba ulang beberapa kali.
@@ -74,6 +82,8 @@ export async function createVisitAction(_prev: FormState, formData: FormData): P
         data: {
           code,
           visitorId: visitor.id,
+          nik,
+          gender: d.gender,
           fullName: d.fullName,
           company: d.company,
           phone,
@@ -85,7 +95,7 @@ export async function createVisitAction(_prev: FormState, formData: FormData): P
           vehiclePlate: d.vehiclePlate ? d.vehiclePlate.toUpperCase() : null,
           consentAt: now,
           inductionSkipped: skip,
-          status: skip ? "WAITING_SECURITY" : "VIDEO",
+          status: "PHOTO",
         },
       });
       redirect(`/v/${code}`);
@@ -97,6 +107,36 @@ export async function createVisitAction(_prev: FormState, formData: FormData): P
     }
   }
   return { error: "Gagal membuat kunjungan. Silakan coba lagi." };
+}
+
+/**
+ * Langkah 2: foto diri. Hanya diterima saat status PHOTO; setelah itu kunjungan
+ * lanjut ke video (atau langsung ke security bila induksi lama masih berlaku).
+ * Jenis berkas diperiksa dari byte awalnya, bukan dari tipe yang diklaim browser.
+ */
+export async function savePhotoAction(code: string, formData: FormData): Promise<FormState> {
+  const visit = await prisma.visit.findUnique({ where: { code } });
+  if (!visit) return { error: "Kunjungan tidak ditemukan." };
+  if (visit.status !== "PHOTO") return {}; // sudah lewat langkah ini; browser tinggal memuat ulang
+
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0) return { error: "Foto belum diambil." };
+  if (file.size > PHOTO_MAX_BYTES) return { error: "Ukuran foto terlalu besar. Ambil ulang." };
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (sniffImageType(bytes) !== "image/jpeg") return { error: "Foto tidak dikenali. Ambil ulang." };
+
+  await prisma.$transaction([
+    prisma.visitPhoto.upsert({
+      where: { visitId: visit.id },
+      create: { visitId: visit.id, contentType: "image/jpeg", data: bytes },
+      update: { contentType: "image/jpeg", data: bytes },
+    }),
+    prisma.visit.update({
+      where: { id: visit.id },
+      data: { status: visit.inductionSkipped ? "WAITING_SECURITY" : "VIDEO" },
+    }),
+  ]);
+  return {};
 }
 
 /** Dipanggil saat video mulai diputar. Hanya mencatat awal pertama. */
@@ -111,6 +151,7 @@ export async function startVideoAction(code: string): Promise<void> {
 export async function completeVideoAction(code: string): Promise<{ ok: boolean; error?: string }> {
   const visit = await prisma.visit.findUnique({ where: { code } });
   if (!visit) return { ok: false, error: "Kunjungan tidak ditemukan." };
+  if (visit.status === "PHOTO") return { ok: false, error: "Ambil foto terlebih dahulu." };
   if (visit.status !== "VIDEO") return { ok: true };
 
   const ind = await getInduction();

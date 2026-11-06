@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, inputClass, secondaryButton } from "@/components/ui";
 import { prisma } from "@/lib/db";
 import { formatDate, formatDateTime, todayJakarta } from "@/lib/format";
-import { formatVisitCode, normalizeVisitCode } from "@/lib/visit";
+import { formatVisitCode, normalizeNik, normalizeVisitCode } from "@/lib/visit";
 import type { VisitStatus } from "@/lib/generated/prisma/client";
 import AutoRefresh from "@/app/v/[code]/auto-refresh";
 
@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Kunjungan · Panel Security" };
 
 const STATUS_LABEL: Record<VisitStatus, string> = {
+  PHOTO: "Mengambil foto",
   VIDEO: "Menonton video",
   QUIZ: "Mengerjakan soal",
   WAITING_SECURITY: "Menunggu security",
@@ -19,6 +20,7 @@ const STATUS_LABEL: Record<VisitStatus, string> = {
 };
 
 const STATUS_STYLE: Record<VisitStatus, string> = {
+  PHOTO: "bg-neutral-100 text-neutral-700",
   VIDEO: "bg-neutral-100 text-neutral-700",
   QUIZ: "bg-neutral-100 text-neutral-700",
   WAITING_SECURITY: "bg-amber-100 text-amber-900",
@@ -90,6 +92,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       where: {
         OR: [
           { code: normalizeVisitCode(query) },
+          { nik: normalizeNik(query).length >= 8 ? normalizeNik(query) : "__" },
           { fullName: { contains: query, mode: "insensitive" } },
           { company: { contains: query, mode: "insensitive" } },
           { phone: { contains: query.replace(/\D/g, "") || "__" } },
@@ -111,7 +114,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const [waiting, inProgress, onSite, recent] = await Promise.all([
     prisma.visit.findMany({ where: { status: "WAITING_SECURITY" }, orderBy: { createdAt: "asc" }, select }),
     prisma.visit.findMany({
-      where: { status: { in: ["VIDEO", "QUIZ"] }, createdAt: { gt: hoursAgo(24) } },
+      where: { status: { in: ["PHOTO", "VIDEO", "QUIZ"] }, createdAt: { gt: hoursAgo(24) } },
       orderBy: { createdAt: "desc" },
       select,
     }),
@@ -157,7 +160,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 function SearchBar({ q }: { q: string }) {
   return (
     <form className="flex gap-2" action="/admin">
-      <input name="q" defaultValue={q} placeholder="Cari kode, nama, perusahaan, atau nomor HP…" className={inputClass} />
+      <input name="q" defaultValue={q} placeholder="Cari kode, nama, perusahaan, NIK lengkap, atau nomor HP…" className={inputClass} />
       <button className={secondaryButton}>Cari</button>
     </form>
   );

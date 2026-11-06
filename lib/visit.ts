@@ -97,3 +97,24 @@ export function shuffle<T>(items: readonly T[]): T[] {
 
 export const COMMITMENT_MIN_LENGTH = 20;
 
+
+/** NIK: 16 digit. Spasi, titik, dan strip dari input dibuang. */
+export function normalizeNik(input: string): string {
+  return input.replace(/[\s.\-]/g, "");
+}
+
+export function isValidNik(input: string): boolean {
+  return /^\d{16}$/.test(normalizeNik(input));
+}
+
+/** Menyamarkan NIK untuk daftar/ekspor: "3201********0001". */
+export function maskNik(nik: string | null | undefined): string {
+  if (!nik) return "";
+  if (nik.length <= 8) return "*".repeat(nik.length);
+  return `${nik.slice(0, 4)}${"*".repeat(nik.length - 8)}${nik.slice(-4)}`;
+}
+
+export const GENDER_LABEL = { LAKI_LAKI: "Laki-laki", PEREMPUAN: "Perempuan" } as const;
+
+/** Batas ukuran foto diri (setelah dikecilkan di browser, biasanya 60–200 KB). */
+export const PHOTO_MAX_BYTES = 600 * 1024;

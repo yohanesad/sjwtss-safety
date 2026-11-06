@@ -22,6 +22,13 @@ Login, kuis, dan video YouTube sudah teruji dari sisi aplikasi.
 - [ ] Coba halaman Admin > Konten di Vercel: ubah teks, warna, logo; pastikan perubahan tampil di halaman pengunjung.
 - [ ] `VIDEO_DURATION_SECONDS`, nilai lulus, dan sumber video kini juga bisa diatur di halaman Konten (menimpa environment variable).
 
+## Foto & NIK (permintaan tim safety)
+- [ ] Konfirmasi ke legal/HR: dasar hukum, lama penyimpanan foto dan NIK, siapa yang boleh melihat (UU PDP). Foto wajah bisa dihitung data biometrik; belum saya pastikan.
+- [ ] Tetapkan kebijakan hapus: saat ini hanya tombol manual di Konten > Penyimpanan data pribadi (hapus foto lebih dari N hari). Belum ada penghapusan otomatis atau penghapusan NIK.
+- [ ] Pengunjung asing tanpa NIK (paspor/KITAS) belum didukung: NIK wajib 16 digit.
+- [ ] Pantau ruang database Neon: tiap foto sekitar 20–80 KB.
+- [ ] Uji kamera di HP asli (Android dan iPhone); kamera depan lewat HTTPS.
+
 ## Akun
 - [ ] Buat akun admin sendiri di halaman Pengguna (peran Admin).
 - [ ] Nonaktifkan `Admin Sementara` (kata sandinya pernah tampil di chat).

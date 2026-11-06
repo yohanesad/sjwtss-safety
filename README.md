@@ -4,12 +4,13 @@ Induksi keselamatan online untuk pengunjung pabrik, dirancang untuk ponsel (Andr
 
 ## Alur pengunjung
 1. Scan QR (poster di `/admin/poster`) atau buka link
-2. Isi biodata singkat + persetujuan data pribadi
-3. Tonton video induksi (tanpa seek/percepatan; server memeriksa lamanya)
-4. 15 soal pilihan ganda (lulus bila semua benar, 100%) + 1 isian komitmen
-5. Layar menampilkan kode & QR → tunjukkan ke security
-6. Security membuka panel, memeriksa, menekan **Setujui**, memberi stiker pass
-7. Pengunjung yang sama (nomor HP sama) dalam 90 hari melewati video & kuis
+2. Data diri: NIK, nama lengkap, PT, jenis kelamin, no HP, ditambah data kunjungan, dan persetujuan data pribadi
+3. **Foto diri** lewat kamera HP (cadangan: input kamera bila akses kamera ditolak)
+4. Tonton video induksi (tanpa seek/percepatan; server memeriksa lamanya). Video baru terbuka setelah foto tersimpan
+5. 15 soal pilihan ganda (lulus bila semua benar) + 1 isian komitmen
+6. Layar menampilkan kode & QR, lalu tunjukkan ke security
+7. Security mencocokkan foto dan NIK dengan KTP, menekan **Setujui**, dan memberi stiker pass
+8. Pengunjung dengan NIK yang sama dalam 90 hari melewati video dan kuis (foto tetap diambil setiap kunjungan)
 
 ## Menjalankan
 ```bash
@@ -29,6 +30,7 @@ Admin membuka **Konten** di panel: semua teks halaman pengunjung, warna utama, l
 ## Yang perlu diketahui
 - Video YouTube: kontrol disembunyikan, lompatan maju dikembalikan, kecepatan dikunci. Pemutar belum diuji dengan YouTube asli (hanya tiruan API), jadi uji di HP Android dan iPhone sebelum dipakai. Jaringan pabrik harus bisa membuka youtube.com.
 - Anti-skip video di browser bukan jaminan mutlak (HP bisa dibiarkan memutar). Lapis lainnya: kuis, isian komitmen, dan konfirmasi tatap muka security.
-- Pengunjung berulang dikenali dari nomor HP; security tetap memeriksa identitas langsung.
+- Pengunjung berulang dikenali dari NIK; security tetap mencocokkan foto dan KTP secara langsung.
+- Foto dan NIK adalah data pribadi. Foto hanya bisa dibuka staf yang sudah masuk, NIK disamarkan di ekspor CSV untuk peran Security, dan Admin dapat menghapus foto lama dari menu Konten. Aturan retensi dan dasar hukum perlu dikonfirmasi dengan bagian legal (UU PDP).
 - Belum ada pembatasan laju (rate limit) pada pembuatan kunjungan.
 - Soal bawaan hanya contoh dan harus diganti.

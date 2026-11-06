@@ -9,6 +9,7 @@ import { getOrigin } from "@/lib/origin";
 import { qrSvg } from "@/lib/qr";
 import { formatVisitCode, normalizeVisitCode, shuffle } from "@/lib/visit";
 import AutoRefresh from "./auto-refresh";
+import PhotoCapture from "./photo-capture";
 import QuizForm from "./quiz-form";
 import VideoPlayer from "./video-player";
 
@@ -32,9 +33,18 @@ export default async function VisitPage({
   const t = c.v;
   const ind = await getInduction();
 
+  if (visit.status === "PHOTO") {
+    return (
+      <VisitorShell title={t.photoTitle} step={{ current: 2, total: 5, label: t.stepPhoto }}>
+        <Intro>{t.photoIntro}</Intro>
+        <PhotoCapture code={code} t={t} />
+      </VisitorShell>
+    );
+  }
+
   if (visit.status === "VIDEO") {
     return (
-      <VisitorShell title={t.videoTitle} step={{ current: 2, total: 4, label: t.stepLabel2 }}>
+      <VisitorShell title={t.videoTitle} step={{ current: 3, total: 5, label: t.stepVideo }}>
         <Intro>{t.videoIntro}</Intro>
         <VideoPlayer code={code} src={ind.videoSrc} youtubeId={ind.youtubeId} t={t} />
       </VisitorShell>
@@ -53,7 +63,7 @@ export default async function VisitPage({
       options: shuffle(q.options.map((label, index) => ({ label, index }))),
     }));
     return (
-      <VisitorShell title={t.quizTitle} step={{ current: 3, total: 4, label: t.stepLabel3 }}>
+      <VisitorShell title={t.quizTitle} step={{ current: 4, total: 5, label: t.stepQuiz }}>
         <Intro>{fill(t.quizIntro, { nilai: ind.passPercent })}</Intro>
         {gagal ? (
           <div role="alert" className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -73,7 +83,7 @@ export default async function VisitPage({
         ? fill(t.waitIntroSkipped, { tanggal: formatDateLocal(visit.visitor.inductionValidUntil) })
         : t.waitIntro;
     return (
-      <VisitorShell title={t.waitTitle} step={{ current: 4, total: 4, label: t.stepLabel4 }}>
+      <VisitorShell title={t.waitTitle} step={{ current: 5, total: 5, label: t.stepConfirm }}>
         <AutoRefresh seconds={5} />
         <Intro>{intro}</Intro>
         <Card className="text-center">
